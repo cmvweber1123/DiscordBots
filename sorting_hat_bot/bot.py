@@ -14,8 +14,8 @@ class LobbyView(miru.View):
 
         super().__init__()
 
+    # Update embed to reflect state of lobby
     async def update(self, ctx) -> None:
-        # Update the view to show users in lobby
         embed = hikari.Embed(title="Customs Lobby")
 
         if self.lobby:
@@ -32,14 +32,14 @@ class LobbyView(miru.View):
 
         await ctx.edit_response(embed, components=self.build())
 
-    # Add user to lobby returning True if the user was added and False otherwise
+    # Add user to lobby if they are not already in it
     async def add(self, ctx) -> None:
         if ctx.user.username not in self.lobby:
             self.lobby.append(ctx.user.username)
 
         await self.update(ctx)
     
-    # Remove user from lobby
+    # Remove user from lobby and teams if they are in them
     async def remove(self, ctx) -> None:
         if ctx.user.username in self.lobby:
             self.lobby.remove(ctx.user.username)
@@ -52,7 +52,7 @@ class LobbyView(miru.View):
 
         await self.update(ctx)
 
-    # Shuffle lobby into teams
+    # Shuffle lobby and assign teams
     async def shuffle(self, ctx) -> None:
         split = -(len(self.lobby) // -2)
 
@@ -63,15 +63,17 @@ class LobbyView(miru.View):
 
         await self.update(ctx)
 
-    # Add user to lobby and update view
+    # Button to add user to lobby
     @miru.button(label="Join", style=hikari.ButtonStyle.SUCCESS)
     async def join_button(self, button: miru.Button, ctx: miru.ViewContext) -> None:
         await self.add(ctx)
 
+    # Button to shuffle lobby and assign teams
     @miru.button(label="Shuffle", style=hikari.ButtonStyle.PRIMARY)
     async def shuffle_button(self, button: miru.Button, ctx: miru.ViewContext) -> None:
         await self.shuffle(ctx)
 
+    # Button to remove user from lobby and teams  
     @miru.button(label="Leave", style=hikari.ButtonStyle.DANGER)
     async def leave_button(self, button: miru.Button, ctx: miru.ViewContext) -> None:
         await self.remove(ctx)
